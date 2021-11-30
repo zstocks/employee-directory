@@ -17,7 +17,13 @@ fetch('https://randomuser.me/api/?results=12&nat=us')
 
   let cards = document.querySelectorAll('.card');
   cards = Array.from(cards);
-  makeModal(data, cards);
+  for (const card of cards) {
+   card.addEventListener('click', () => {
+    let thisCard = cards.indexOf(card);
+    makeModal(thisCard, data);
+   });
+  }
+
  });
 
 /**
@@ -46,58 +52,59 @@ const makeCards = userData => {
   }
 }
 
-const makeModal = (userData, arr) => {
- for (let i = 0; i < userData.results.length; i++) {
+const makeModal = (card, data) => {
+ 
+ const nextCard = card + 1;
+ const prevCard = card - 1;
+ const user = data.results[card];
+ console.log(user);
 
-  arr[i].addEventListener('click', () => {
-   if (arr[i].querySelector('#email').textContent === userData.results[i].email) {
-    const user = userData.results[i];
-    //Need to reformat phone and birthday
-    const userPhone = '(xxx) xxx-xxxx';
-    const userDOB = '10/21/1998';
+ //Format the API results for this user's phone and date of birth.
+ const userPhone = `(${user.phone.slice(1, 4)}) ${user.phone.slice(6, 9)}-${user.phone.slice(-4)}`; // (xxx) xxx-xxxx
+ const userDOB = `${user.dob.date.slice(5, 7)}/${user.dob.date.slice(8, 10)}/${user.dob.date.slice(0, 4)}`; // MM/DD/YYYY
 
-    // Build modal HTML
-    let html = `
-     <div class="modal-container">
-      <div class="modal">
-       <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
-       <div class="modal-info-container">
-        <img class="modal-img" src="${user.picture.large}" alt="profile picture">
-        <h3 id="${user.name.first}-${user.name.last}-modal" class="modal-name cap">${user.name.first} ${user.name.last}</h3>
-        <p class="modal-text">${user.email}</p>
-        <p class="modal-text cap">${user.location.city}</p>
-        <hr>
-        <p class="modal-text">${userPhone}</p>
-        <p class="modal-text">${user.location.street.number} ${user.location.street.name}, ${user.location.city}, ${user.location.state} ${user.location.postcode}</p>
-        <p class="modal-text">Birthday: ${userDOB}</p>
-       </div>
-      </div>
+ // Build modal HTML
+ let html = `
+ <div class="modal-container">
+  <div class="modal">
+   <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
+    <div class="modal-info-container">
+     <img class="modal-img" src="${user.picture.large}" alt="profile picture">
+     <h3 id="${user.name.first}-${user.name.last}-modal" class="modal-name cap">${user.name.first} ${user.name.last}</h3>
+     <p class="modal-text">${user.email}</p>
+     <p class="modal-text cap">${user.location.city}</p>
+     <hr>
+     <p class="modal-text">${userPhone}</p>
+     <p class="modal-text">${user.location.street.number} ${user.location.street.name}, ${user.location.city}, ${user.location.state} ${user.location.postcode}</p>
+     <p class="modal-text">Birthday: ${userDOB}</p>
+    </div>
+   </div>
 
-      // IMPORTANT: Below is only for exceeds tasks
-      <div class="modal-btn-container">
-       <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
-       <button type="button" id="modal-next" class="modal-next btn">Next</button>
-      </div>
-     </div>
-    `;
-    
-    // Add Modal to DOM
-    document.querySelector('body').insertAdjacentHTML('beforeend', html);
-   }
-  });
+   // IMPORTANT: Below is only for exceeds tasks
+   <div class="modal-btn-container">
+    <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
+    <button type="button" id="modal-next" class="modal-next btn">Next</button>
+   </div>
+  </div>
+ `;
 
- }
-
-
- // const image = card.querySelector('img').src;
- // const name = card.querySelector('h3').textContent;
+ // Add Modal to DOM
+ document.querySelector('body').insertAdjacentHTML('beforeend', html);
+ document.querySelector('.modal-close-btn').addEventListener('click', closeModal);
+ document.querySelector('#modal-prev').addEventListener('click', prevModal(prevCard, data));
 }
 
-// cards are built and added to DOM [check]
-// card elements are added to an array [check]
-// use array to add event listeners on each card [check]
-// on click, compare card.querySelector('#email').textContent to user.email [check]
-// on match, build a modal with the user's info and
-// add the modal to the DOM
-// modal is removed from DOM on close, but event listeners remain on the card elements
+const closeModal = () => {
+    document.querySelector('.modal-container').remove();
+}
 
+const nextModal = user => {
+ 
+}
+
+const prevModal = (card, data) => {
+ return function(card, data) {
+  closeModal();
+  makeModal(card, data);
+ }
+}
