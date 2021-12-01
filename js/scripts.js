@@ -2,6 +2,22 @@ const searchContainer = document.querySelector('.search-container');
 const gallery = document.querySelector('#gallery');
 let index;
 
+// Add search element to the DOM
+let html = `
+ <form action="#" method="get">
+  <input type="search" id="search-input" class="search-input" placeholder="Search..." incremental>
+ </form>
+`;
+searchContainer.insertAdjacentHTML('beforeend', html);
+
+// Add an error message to the DOM for when a user's search yields no results
+html = `<p id="no-match">Your search does not match any employees.</p>`;
+document.querySelector('body').insertAdjacentHTML('beforeend', html);
+
+// Select search field and error message now that they're in the DOM
+const search = searchContainer.querySelector('#search-input');
+const searchErr = document.querySelector('#no-match');
+
 // Get 12 random people in the US from the RandomUser API
 fetch('https://randomuser.me/api/?results=12&nat=us')
  .then( response => response.json() )
@@ -13,6 +29,13 @@ fetch('https://randomuser.me/api/?results=12&nat=us')
   let cards = document.querySelectorAll('.card');
   cards = Array.from(cards);
 
+  // Put employee names in an array
+  const names = cards.map( card => card.querySelector('h3').textContent.toLowerCase());
+  // When users interact with the search field, filter employees on the page
+  search.addEventListener('search', () => {
+    filterEmployees(names, cards);
+  });
+
   // Add an event listener to each card to generate a modal for the card that is clicked
   for (const card of cards) {
    card.addEventListener('click', () => {
@@ -21,6 +44,34 @@ fetch('https://randomuser.me/api/?results=12&nat=us')
    });
   }
  });
+
+/**
+ * Filter employees by name based on search input
+ * 
+ * @param {array} names - an array of employee names
+ * @param {array} cards - an array of HTML elements
+ */
+const filterEmployees = (names, cards) => {
+ let match = false;
+ const input = search.value.toLowerCase();
+ 
+ // Hide cards on the page that do not match search input.
+ for (const name of names) {
+  if (name.includes(input)) {
+   match = true;
+   cards[names.indexOf(name)].style.display = 'flex';
+  } else {
+   cards[names.indexOf(name)].style.display = 'none';
+  }
+ }
+
+ // If there are no matches to the search input, display the error message.
+ if (!match) {
+  searchErr.style.display = 'block';
+ } else {
+  searchErr.style.display = 'none';
+ }
+}
 
 /**
 * Create each employee's card using the RandomUser API results.
@@ -125,13 +176,3 @@ const formatDOB = employee => `${employee.dob.date.slice(5, 7)}/${employee.dob.d
 const closeModal = () => {
     document.querySelector('.modal-container').remove();
 }
-
-// Add search element to the DOM
-let html = `
- <form action="#" method="get">
-  <input type="search" id="search-input" class="search-input" placeholder="Search...">
-  <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
- </form>
-`;
-
-searchContainer.insertAdjacentHTML('beforeend', html);
