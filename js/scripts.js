@@ -23,13 +23,13 @@ fetch('https://randomuser.me/api/?results=12&nat=us')
  .then( response => response.json() )
  .then( data => {
   console.log(data.results);
-  makeCards(data);
+  makeCards(data.results);
 
   // Generate an array containing all the employee cards
   let cards = document.querySelectorAll('.card');
   cards = Array.from(cards);
 
-  // Put employee names in an array
+  // Put employee names into an array
   const names = cards.map( card => card.querySelector('h3').textContent.toLowerCase());
   // When users interact with the search field, filter employees on the page
   search.addEventListener('search', () => {
@@ -76,20 +76,20 @@ const filterEmployees = (names, cards) => {
 /**
 * Create each employee's card using the RandomUser API results.
 * 
-* @param {Object} userData - JSON response from the Random User API.
+* @param {Object} data - JSON response from the Random User API.
 */
-const makeCards = userData => {
- for (const user of userData.results) {
+const makeCards = data => {
+ for (const employee of data) {
   // Build the card's HTML
   let html = `
    <div class="card">
     <div class="card-img-container">
-     <img class="card-img" src="${user.picture.large}" alt="profile picture">
+     <img class="card-img" src="${employee.picture.large}" alt="profile picture">
     </div>
     <div class="card-info-container">
-     <h3 id="${user.name.first.toLowerCase()}-${user.name.last.toLowerCase()}" class="card-name cap">${user.name.first} ${user.name.last}</h3>
-     <p id="email" class="card-text">${user.email}</p>
-     <p class="card-text cap">${user.location.city}, ${user.location.state}</p>
+     <h3 id="${employee.name.first.toLowerCase()}-${employee.name.last.toLowerCase()}" class="card-name cap">${employee.name.first} ${employee.name.last}</h3>
+     <p id="email" class="card-text">${employee.email}</p>
+     <p class="card-text cap">${employee.location.city}, ${employee.location.state}</p>
     </div>
    </div>
   `;
