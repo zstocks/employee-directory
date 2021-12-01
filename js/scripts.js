@@ -1,5 +1,8 @@
 const searchContainer = document.querySelector('.search-container');
 const gallery = document.querySelector('#gallery');
+let thisCard;
+let nextCard;
+let prevCard;
 
 let html = `
  <form action="#" method="get">
@@ -14,13 +17,19 @@ fetch('https://randomuser.me/api/?results=12&nat=us')
  .then( data => {
   console.log(data.results);
   makeCards(data);
+  const employees = data.results;
 
   let cards = document.querySelectorAll('.card');
   cards = Array.from(cards);
   for (const card of cards) {
    card.addEventListener('click', () => {
-    let thisCard = cards.indexOf(card);
+    thisCard = cards.indexOf(card);
     makeModal(thisCard, data);
+
+    
+
+    
+
    });
   }
 
@@ -54,8 +63,6 @@ const makeCards = userData => {
 
 const makeModal = (card, data) => {
  
- const nextCard = card + 1;
- const prevCard = card - 1;
  const user = data.results[card];
  console.log(user);
 
@@ -80,31 +87,37 @@ const makeModal = (card, data) => {
     </div>
    </div>
 
-   // IMPORTANT: Below is only for exceeds tasks
    <div class="modal-btn-container">
-    <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
-    <button type="button" id="modal-next" class="modal-next btn">Next</button>
+    <button type="button" id="modal-prev" class="modal-prev btn" ${thisCard === 0 ? 'style="display: none;"' : ''}>Prev</button>
+    <button type="button" id="modal-next" class="modal-next btn" ${thisCard === 11 ? 'style="display: none;"' : ''}>Next</button>
    </div>
   </div>
  `;
 
  // Add Modal to DOM
  document.querySelector('body').insertAdjacentHTML('beforeend', html);
+
+ // When the close button is clicked, remove the modal from the DOM
  document.querySelector('.modal-close-btn').addEventListener('click', closeModal);
- document.querySelector('#modal-prev').addEventListener('click', prevModal(prevCard, data));
+
+ // When the next button is clicked, display a modal for the next employee
+ document.querySelector('#modal-next').addEventListener('click', () => {
+  thisCard += 1;
+  closeModal();
+  makeModal(thisCard, data);
+ });
+
+ // When the prev button is clicked, display a modal for the previous employee
+ document.querySelector('#modal-prev').addEventListener('click', () => {
+  thisCard -= 1;
+  closeModal();
+  makeModal(thisCard, data);
+ });
 }
 
+/**
+ * Removes the current modal from the DOM
+ */
 const closeModal = () => {
     document.querySelector('.modal-container').remove();
-}
-
-const nextModal = user => {
- 
-}
-
-const prevModal = (card, data) => {
- return function(card, data) {
-  closeModal();
-  makeModal(card, data);
- }
 }
